@@ -2,8 +2,12 @@
 
 # production with source maps (browserify and minifyify are global packages)
 build:
+	@mkdir -p build
+	@cat lib/*\.js > build/libs.js
 	@browserify -d index.js -t [ babelify minifyify ] > build/build.js
+
 	@cat css/*\.css css/*\.less > build/build.less
 	@lessc --clean-css build/build.less build/build.css
 	@rm build/build.less
+
 	@echo browserified, babelified, minifyified

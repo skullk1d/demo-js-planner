@@ -1,3 +1,6 @@
 import { sayHello } from './hello.js';
 
-sayHello();
+// main
+$(document).ready(function () {
+	sayHello();
+});
