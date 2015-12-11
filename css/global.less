@@ -1,0 +1,51 @@
+@charset "UTF-8";
+
+@import '../css/mixins.less';
+@import '../css/uiMixins.less';
+
+* {
+	.box-sizing(border-box);
+}
+
+html, body, header, nav, section, footer, form, input, fieldset, textarea, figure, article, div, ul, li, h1, h2, h3, p, a {
+	/*border:1px dotted #fff;*/
+	margin: 0;
+	padding:0;
+	font-family: "ubuntu", Helvetica, Arial, sans-serif;
+	color: #EEE;
+	text-decoration:none;
+	font-weight: normal;
+}
+
+html,body, .app {
+	width:100%;
+}
+
+li {
+	list-style:none;
+}
+
+a, div {
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+a, img {
+	border: none;
+}
+
+
+
+.transluscent60 {
+	/* for web browsers that doesn't support RGBa */
+	background: rgb(0, 0, 0);
+	/* RGBa with 0.6 opacity */
+	background: rgba(0, 0, 0, 0.6);
+}
+
+.hidden {
+	display: none;
+}
+
+.animate {
+	.transition(margin 0.5s ease, width 0.5s ease, transform 0.5s ease, opacity 0.25s ease, filter 0.5s ease);
+}
