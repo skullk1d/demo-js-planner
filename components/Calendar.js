@@ -123,46 +123,83 @@ class Calendar extends EventEmitter {
 	}
 
 	addEventBox(eventData) {
-		// create box with raw event data, place on physical calendar
-		var totalMinutes = eventData.dateFrom.getMinutes() + eventData.dateFrom.getHours() * 60;
-		var fromCalRow = this.elem.find(`#minute${totalMinutes}`);
-		var fromCalRowRect = fromCalRow[0].getBoundingClientRect();
-
-		totalMinutes = eventData.dateTo.getMinutes() + eventData.dateTo.getHours() * 60;
-		var toCalRow = this.elem.find(`#minute${totalMinutes}`);
-		var toCalRowRect = toCalRow[0].getBoundingClientRect();
-
-		var eventBox = $(`<div id=${eventData.id} class="eventBox"></div>`);
+		// check if this event overlap from and to dates of other events
 		var eventIds = this.eventsByDate[this.formattedDate];
 
-		// check if this event overlap from and to dates of other events
-		/*var numOverlaps = 0;
-		for (var i = 0; i < eventIds.length; i += 1) {
-			let curData = calendarManager.eventsData[eventIds[i]];
+		var numOverlaps = 0;
+		var collisionIds = [];
+		var i, eventId;
+		for (i = 0; i < eventIds.length; i += 1) {
+			eventId = eventIds[i];
+			if (eventData.id === eventId) {
+				continue;
+			}
+
+			let compareData = calendarManager.eventsData[eventId];
 
 			let eventFrom = eventData.dateFrom.getTime(); // eventData
-			let curFrom = curData.dateFrom.getTime(); // comparedDate
+			let compareFrom = compareData.dateFrom.getTime(); // comparedDate
 			let eventTo = eventData.dateTo.getTime();
-			let curTo = curData.dateTo.getTime();
+			let compareTo = compareData.dateTo.getTime();
 
 			// essentially overlapping rect check
-			let overlapY = Math.abs(Math.min(eventTo, curTo) - Math.max(eventFrom, curFrom));
+			let overlapY = Math.min(eventTo, compareTo) - Math.max(eventFrom, compareFrom);
 
 			if (overlapY > 0) {
 				numOverlaps += 1;
+				collisionIds.push(eventId);
 			}
-		}*/
-		// TODO: overlap checking
-		let numOverlaps = 1;
+		}
+
+		// create box with raw event data, place on physical calendar
+		var totalMinutes = eventData.dateFrom.getMinutes() + eventData.dateFrom.getHours() * 60;
+		var fromCalRow = this.elem.find(`#minute${totalMinutes}`);
+		var fromCalRowRectTop = fromCalRow[0].offsetTop;
+
+		totalMinutes = eventData.dateTo.getMinutes() + eventData.dateTo.getHours() * 60;
+		var toCalRow = this.elem.find(`#minute${totalMinutes}`);
+		var toCalRowRectTop = toCalRow[0].offsetTop;
+
+		// append, compute dimensions, position
+		var eventBox = $(`<div id=${eventData.id} class="eventBox"></div>`);
+		var boxWidthPerc = 95 / (1 + numOverlaps);
 
 		eventBox.css({
-			'left': fromCalRow.find('.timeLabel').css('width'),
-			'top': `${fromCalRowRect.top}px`,
-			'width': `${95 / numOverlaps}%`,
-			'height': `${toCalRowRect.top - fromCalRowRect.top}px`
+			'width': `${boxWidthPerc}%`,
+			'height': `${toCalRowRectTop - fromCalRowRectTop}px`,
+			'margin-top': `${fromCalRowRectTop}px` // don't overwrite transform
 		});
 
 		this.elem.append(eventBox);
+
+		// TODO: create class for EventBox
+		// for now, tapping an event duplicates it
+		eventBox.bind('touch click', e => {
+			calendarManager.addEvent(eventData.dateFrom, eventData.dateTo);
+		});
+
+		// adjust boxes we collided with, otherwise finish positioning current box and exit
+		if (!numOverlaps) {
+			eventBox.css({
+				'transform': `translateX(${fromCalRow.find('.timeLabel').width()}px)`
+			});
+
+			return;
+		}
+
+		collisionIds.push(eventData.id); // include current event
+		collisionIds = collisionIds.sort();
+		for (i = 0; i < collisionIds.length; i += 1) {
+			eventId = collisionIds[i];
+			eventBox = this.elem.find(`#${eventId}`);
+			eventBox.width(`${boxWidthPerc}%`); // need this computed
+
+			var boxLeft = fromCalRow.find('.timeLabel').width() + (eventBox.width() * i);
+
+			eventBox.css({
+				'transform': `translateX(${boxLeft}px)`
+			});
+		}
 	}
 
 	static formatDate(date) {
