@@ -46,31 +46,36 @@ class CalendarManager extends EventEmitter {
 	}
 
 	updateEvent(id, newData) {
-		var event = this.getEvent(id);
-		if (!event) {
+		var eventData = this.getEvent(id);
+		if (!eventData) {
 			return;
 		}
 
-		// NOTE: newData props must match event object format
+		// NOTE: newData props must match eventData object format
 		for (var prop in newData) {
-			if (!event[prop]) {
-				console.warn(`${prop} is not a valid event property`);
+			if (!eventData.hasOwnProperty(prop)) {
+				console.warn(`${prop} is not a valid eventData property`);
 				continue;
 			}
 
-			event[prop] = newData[prop];
+			eventData[prop] = newData[prop];
 		}
 
 		this.emit('updateEvent', id);
 	}
 
 	getEvent(id) {
-		var event = this.eventsData[id];
-		if (!event) {
+		var eventData = this.eventsData[id];
+		if (!eventData) {
 			return console.error(`Event ${id} does not exist`);
 		}
 
-		return event;
+		return eventData;
+	}
+
+	setNodes(id, nodeIds) {
+		var eventData = this.eventsData[id];
+		eventData.nodes = nodeIds;
 	}
 }
 

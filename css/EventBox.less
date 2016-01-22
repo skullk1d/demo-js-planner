@@ -1,0 +1,109 @@
+.EventBox {
+	position: absolute;
+	left: 0;
+	top: 0;
+	background-color: #86B3EC;
+	/*border: #6A85A7 1px solid;*/
+	.box-shadow(2px 2px 5px 0px rgba(0,0,0,0.5));
+
+	.handleBar {
+		width: 100%;
+		height: 24px;
+		position: absolute;
+		font-size: 20px;
+		color: #fff;
+		text-align: center;
+		vertical-align: middle;
+
+		&.up {
+			top: 0;
+		}
+		&.down {
+			bottom: 0;
+		}
+
+		&.active {
+			.animation-name(pulse);
+			.animation-duration(1.5s);
+			.animation-iteration-count(infinite);
+		}
+	}
+
+	.deleteButton {
+		position: absolute;
+		top: 0;
+		right: 0;
+		font-size: 20px;
+		color: #6A85A7;
+		text-align: center;
+		vertical-align: middle;
+
+		&.active {
+			.animation-name(pulse);
+			.animation-duration(1.5s);
+			.animation-iteration-count(infinite);
+		}
+	}
+
+	.timeHeader {
+		position: relative;
+		font-size: 14px;
+		color: #000;
+		font-weight: bold;
+		margin: 8px;
+	}
+
+	.descriptionLabel,
+	.descriptionInput {
+		position: relative;
+		font-size: 16px;
+		color: #000;
+		width: 100%;
+		display: inline-block;
+		padding: 8px;
+	}
+
+	.descriptionLabel {
+		font-weight: lighter;
+	}
+
+	.descriptionInput {
+		.box-shadow(inset 3px 3px 25px -5px rgba(0, 0, 0, 0.75));
+		display: none;
+		resize: none;
+		border: none;
+		background-color: inherit;
+	}
+	.confirmButton,
+	.cancelButton {
+		display: none;
+		width: 60px;
+		height: 24px;
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		line-height: 22px;
+		font-size: 14px;
+		font-weight: lighter;
+		color: #fff;
+		text-align: center;
+	}
+
+	.confirmButton {
+		background-color: #6A85A7;
+		left: 62px;
+	}
+
+	&.editing {
+		.descriptionLabel {
+			display: none;
+		}
+		.descriptionInput {
+			display: inline-block;
+		}
+		.confirmButton,
+		.cancelButton {
+			display: block;
+		}
+	}
+}

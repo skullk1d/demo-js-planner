@@ -12,6 +12,10 @@ css:
 	@rm build/build.less
 	@echo built css
 
+watch:
+	@echo Watching for changes...
+	@fswatch -o -r components css | xargs -n1 -I{} sh -c 'echo changed && make bundle'
+
 # production with source maps (browserify and minifyify are global packages)
 build: js css
 	@echo browserified, babelified, minifyified

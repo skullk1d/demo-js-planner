@@ -1,6 +1,0 @@
-/* must be single line */
-.keyframes(~'spinCW, from { transform:rotate(0deg); } to { transform:rotate(360deg); }');
-
-.keyframes(~'spinCCW, from { transform:rotate(360deg); } to { transform:rotate(0deg); }');
-
-.keyframes(~'stutter, 0% { transform: skewX(0deg); opacity: 0.5; } 50% { transform: skewX(20deg); opacity: 0.5; } 100% { transform: skewX(-20deg); }');
