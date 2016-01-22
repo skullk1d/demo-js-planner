@@ -190,7 +190,7 @@ class Calendar extends EventEmitter {
 
 		totalMinutes = eventData.dateTo.getMinutes() + eventData.dateTo.getHours() * 60;
 		var toCalRow = this.elem.find(`#minute${totalMinutes}`);
-		var toCalRowRectTop = toCalRow[0].offsetTop;
+		var toCalRowRectTop = toCalRow.offset().top;
 
 		// find or append, compute dimensions, position
 		var eventBox = new EventBox({
@@ -208,8 +208,8 @@ class Calendar extends EventEmitter {
 
 		var eventBoxElem = eventBox.elem;
 		eventBoxElem.css({
-			'height': `${toCalRowRectTop - fromCalRowRectTop}px`,
-			'margin-top': `${fromCalRowRectTop}px` // don't overwrite transform
+			'height': `${toCalRowRectTop - fromCalRowRectTop - Calendar.ROW_HEIGHT}px`,
+			'margin-top': `${fromCalRowRectTop + 1}px` // don't overwrite transform
 		});
 		this.elem.append(eventBoxElem);
 

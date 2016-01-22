@@ -23,17 +23,17 @@ class EventBox extends EventEmitter {
 		// build
 		this.timeHeader = $(`<div class="timeHeader">x</div>`).appendTo(this.elem);
 
-		this.handleBars = [
-			$(`<div class="handleBar up">=</div>`).appendTo(this.elem),
-			$(`<div class="handleBar down">&#8661;</div>`).appendTo(this.elem)
-		];
-		this.deleteButton = $(`<div class="deleteButton">x</div>`).appendTo(this.elem);
-
 		this.descriptionLabel = $(`<div class="descriptionLabel"></div>`).appendTo(this.elem);
 		this.descriptionInput = $(`<textarea class="descriptionInput"></textarea>`).appendTo(this.elem);
 
 		this.cancelButton = $(`<div class="cancelButton">Cancel</div>`).appendTo(this.elem);
 		this.confirmButton = $(`<div class="confirmButton">Save</div>`).appendTo(this.elem);
+
+		this.handleBars = [
+			$(`<div class="handleBar up">=</div>`).appendTo(this.elem),
+			$(`<div class="handleBar down">&#8661;</div>`).appendTo(this.elem)
+		];
+		this.deleteButton = $(`<div class="deleteButton">x</div>`).appendTo(this.elem);
 
 		this.setupEvents();
 		this.refreshContent();
@@ -93,12 +93,14 @@ class EventBox extends EventEmitter {
 					if (handleBar.hasClass('down')) { // add to dateTo
 						let dHeight = self.elem.height() - lastHeight;
 						addedMinutes = (dHeight / Calendar.ROW_HEIGHT) * Calendar.INTERVAL;
-						self.data.dateTo.setMinutes(self.data.dateTo.getMinutes() + addedMinutes);
+
+						self.data.dateTo = self.addMinutesTo(self.data.dateTo, addedMinutes);
 					} else if (handleBar.hasClass('up')) { // add to both
 						let dOffset = self.elem.offset().top - lastOffset;
 						addedMinutes = (dOffset / Calendar.ROW_HEIGHT) * Calendar.INTERVAL;
-						self.data.dateFrom.setMinutes(self.data.dateFrom.getMinutes() + addedMinutes);
-						self.data.dateTo.setMinutes(self.data.dateTo.getMinutes() + addedMinutes);
+
+						self.data.dateFrom = self.addMinutesTo(self.data.dateFrom, addedMinutes);
+						self.data.dateTo = self.addMinutesTo(self.data.dateTo, addedMinutes);
 					}
 
 					self.emit('updateEvent', self.data);
@@ -148,6 +150,16 @@ class EventBox extends EventEmitter {
 		var timeStrTo = Calendar.formatTime(data.dateTo);
 		this.timeHeader.html(`${timeStrFrom} to ${timeStrTo}`);
 		this.descriptionLabel.html(data.description);
+	}
+
+	addMinutesTo(date, minutes) {
+		// mod to 15 minutes
+		minutes = Math.round(minutes);
+		let modMinutes = minutes - (minutes % Calendar.INTERVAL);
+		let newTime = date.getTime() + (modMinutes * 60 * 1000);
+		let newDate = new Date(newTime);
+
+		return newDate;
 	}
 }
 
