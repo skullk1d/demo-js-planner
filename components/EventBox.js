@@ -26,14 +26,14 @@ class EventBox extends EventEmitter {
 		this.descriptionLabel = $(`<div class="descriptionLabel"></div>`).appendTo(this.elem);
 		this.descriptionInput = $(`<textarea class="descriptionInput"></textarea>`).appendTo(this.elem);
 
-		this.cancelButton = $(`<div class="cancelButton">Cancel</div>`).appendTo(this.elem);
-		this.confirmButton = $(`<div class="confirmButton">Save</div>`).appendTo(this.elem);
-
 		this.handleBars = [
 			$(`<div class="handleBar up">=</div>`).appendTo(this.elem),
 			$(`<div class="handleBar down">&#8661;</div>`).appendTo(this.elem)
 		];
 		this.deleteButton = $(`<div class="deleteButton">x</div>`).appendTo(this.elem);
+
+		this.cancelButton = $(`<div class="cancelButton">Cancel</div>`).appendTo(this.elem);
+		this.confirmButton = $(`<div class="confirmButton">Save</div>`).appendTo(this.elem);
 
 		this.setupEvents();
 		this.refreshContent();
@@ -53,9 +53,6 @@ class EventBox extends EventEmitter {
 			handleBar.bind('touchstart mousedown', e => {
 				e.preventDefault();
 
-				var lastHeight = this.elem.height();
-				var lastOffset = this.elem.offset().top;
-
 				// show it's active
 				handleBar.addClass('active');
 
@@ -69,6 +66,9 @@ class EventBox extends EventEmitter {
 						e.originalEvent || e;
 
 					setTimeout(() => {
+						let lastHeight = self.elem.height();
+						let lastOffset = this.elem.offset().top;
+
 						if (handleBar.hasClass('down')) { // add to dateTo
 							let newHeight = Math.round(Math.max(touch.pageY - self.elem.offset().top, Calendar.ROW_HEIGHT * 2));
 							self.elem.height(newHeight - (newHeight % Calendar.ROW_HEIGHT) + Calendar.ROW_HEIGHT);
@@ -76,6 +76,29 @@ class EventBox extends EventEmitter {
 							let newOffset = Math.round(Math.max(touch.pageY, 0));
 							self.elem.offset({ top: newOffset - (newOffset % Calendar.ROW_HEIGHT) });
 						}
+
+						if (self.elem.height() === lastHeight && self.elem.offset().top === lastOffset) {
+							return;
+						}
+
+						// update event data
+						var addedMinutes;
+
+						// up or down?
+						if (handleBar.hasClass('down')) { // add to dateTo
+							let dHeight = self.elem.height() - lastHeight;
+							addedMinutes = (dHeight / Calendar.ROW_HEIGHT) * Calendar.INTERVAL;
+
+							self.data.dateTo = self.addMinutesTo(self.data.dateTo, addedMinutes);
+						} else if (handleBar.hasClass('up')) { // add to both
+							let dOffset = self.elem.offset().top - lastOffset;
+							addedMinutes = (dOffset / Calendar.ROW_HEIGHT) * Calendar.INTERVAL;
+
+							self.data.dateFrom = self.addMinutesTo(self.data.dateFrom, addedMinutes);
+							self.data.dateTo = self.addMinutesTo(self.data.dateTo, addedMinutes);
+						}
+
+						self.refreshContent();
 					}, 100);
 				});
 
@@ -86,23 +109,7 @@ class EventBox extends EventEmitter {
 					handleBar.unbind('touchmove');
 					handleBar.unbind('mousemove'); // need to call separately
 
-					// update event and emit date change
-					var addedMinutes;
-
-					// up or down?
-					if (handleBar.hasClass('down')) { // add to dateTo
-						let dHeight = self.elem.height() - lastHeight;
-						addedMinutes = (dHeight / Calendar.ROW_HEIGHT) * Calendar.INTERVAL;
-
-						self.data.dateTo = self.addMinutesTo(self.data.dateTo, addedMinutes);
-					} else if (handleBar.hasClass('up')) { // add to both
-						let dOffset = self.elem.offset().top - lastOffset;
-						addedMinutes = (dOffset / Calendar.ROW_HEIGHT) * Calendar.INTERVAL;
-
-						self.data.dateFrom = self.addMinutesTo(self.data.dateFrom, addedMinutes);
-						self.data.dateTo = self.addMinutesTo(self.data.dateTo, addedMinutes);
-					}
-
+					// emit final change to event data
 					self.emit('updateEvent', self.data);
 				});
 			});
@@ -117,7 +124,6 @@ class EventBox extends EventEmitter {
 			e.stopPropagation();
 			self.descriptionInput.val(self.data.description);
 			self.elem.addClass('editing');
-			self.descriptionInput.outerHeight(self.elem.height() - self.handleBars[0].height());
 			self.descriptionInput.focus();
 			self.descriptionInput.select();
 		});
@@ -146,10 +152,11 @@ class EventBox extends EventEmitter {
 
 	refreshContent() {
 		let data = this.data;
-		var timeStrFrom = Calendar.formatTime(data.dateFrom);
-		var timeStrTo = Calendar.formatTime(data.dateTo);
+		let timeStrFrom = Calendar.formatTime(data.dateFrom);
+		let timeStrTo = Calendar.formatTime(data.dateTo);
 		this.timeHeader.html(`${timeStrFrom} to ${timeStrTo}`);
 		this.descriptionLabel.html(data.description);
+		this.descriptionInput.outerHeight(this.elem.height() - (this.handleBars[0].height() * 3));
 	}
 
 	addMinutesTo(date, minutes) {

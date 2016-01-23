@@ -208,7 +208,7 @@ class Calendar extends EventEmitter {
 
 		var eventBoxElem = eventBox.elem;
 		eventBoxElem.css({
-			'height': `${toCalRowRectTop - fromCalRowRectTop - Calendar.ROW_HEIGHT}px`,
+			'height': `${toCalRowRectTop - fromCalRowRectTop}px`,
 			'margin-top': `${fromCalRowRectTop + 1}px` // don't overwrite transform
 		});
 		this.elem.append(eventBoxElem);
